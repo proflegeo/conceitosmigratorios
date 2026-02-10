@@ -14,7 +14,7 @@
             color: #eee; 
             font-family: 'Segoe UI', sans-serif; 
             margin: 0; 
-            /* O segredo para o iPhone: dvh ajusta a altura dinamicamente */
+            /* Altura dinâmica para corrigir teclado do iPhone */
             height: 100dvh; 
             display: flex; 
             justify-content: center; 
@@ -31,7 +31,7 @@
             gap: 15px; 
         }
 
-        /* Topo: Vidas e Botão Reiniciar */
+        /* Topo */
         .hud { 
             display: flex; 
             justify-content: space-between; 
@@ -52,19 +52,19 @@
             text-transform: uppercase;
         }
 
-        /* Tela preta (Flexível para ocupar o espaço que sobra) */
+        /* Tela Central */
         .screen { 
             background: #000; 
             border-left: 4px solid var(--purple); 
             padding: 20px; 
-            flex-grow: 1; /* Ocupa todo o espaço livre no meio */
+            flex-grow: 1; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center;
             text-align: center; 
             border-radius: 8px; 
-            overflow-y: auto; /* Se o texto for gigante, rola só aqui dentro */
+            overflow-y: auto; 
         }
 
         .def { font-size: 1.3rem; line-height: 1.4; font-weight: 500; }
@@ -80,12 +80,12 @@
         }
         .show { display: block; animation: fadeIn 0.5s; }
 
-        /* Área de input fixa no fundo */
+        /* Controles Fixos no Fundo */
         .controls {
             display: flex; 
             flex-direction: column; 
             gap: 10px; 
-            padding-bottom: env(safe-area-inset-bottom); /* Proteção para iPhones novos */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         input { 
@@ -94,7 +94,7 @@
             color: #fff; 
             padding: 15px; 
             width: 100%; 
-            font-size: 16px; /* 16px evita zoom automático no iPhone */
+            font-size: 16px; 
             border-radius: 8px; 
             text-transform: uppercase; 
             outline: none;
@@ -118,7 +118,7 @@
 
         .msg { text-align: center; height: 20px; font-weight: bold; font-size: 0.9rem; margin-top: -5px;}
 
-        /* Telas de Início/Fim */
+        /* Telas de Início */
         .overlay { 
             position: fixed; inset: 0; 
             background: rgba(0,0,0,0.98); 
@@ -170,7 +170,9 @@
         <p style="color: #aaa; max-width: 400px; line-height: 1.5;">Sistema de navegação comprometido.<br>Responda para restaurar os dados.</p>
         <button class="btn-start" onclick="init()">INICIAR MISSÃO</button>
     </div>
+
     <script>
+        // Correção aplicada: variável renomeada para 'db' para bater com o código lógico
         const db = [
             { t: "Migração", d: "Termo geral para qualquer deslocamento de pessoas pelo espaço geográfico.", h: "Pesquise: 'Definição geral de deslocamento populacional'." },
             { t: "Migração interna", d: "Deslocamento de pessoas dentro das fronteiras de um mesmo país.", h: "Pesquise: 'Tipos de migração dentro do território nacional'." },
@@ -247,7 +249,6 @@
             
             st.c = st.q.pop();
             
-            // Efeitos visuais de transição
             const qEl = document.getElementById('q');
             qEl.style.opacity = 0;
             setTimeout(() => {
@@ -266,26 +267,21 @@
             let v = document.getElementById('ans').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             // Normaliza a resposta oficial
             let r = st.c.t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            
-            // Verifica se existe lista de respostas alternativas (a) e normaliza elas
+            // Normaliza as alternativas
             let alt = st.c.a ? st.c.a.map(x => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()) : [];
 
             const msgEl = document.getElementById('msg');
 
-            // Verifica se bate com a oficial OU com alguma alternativa
             if (v === r || alt.includes(v)) {
                 st.s++; 
                 msgEl.innerText = "✅ CERTO!";
                 msgEl.style.color = "#0aff0a";
-                // Pequeno delay para ler a mensagem antes de trocar
                 setTimeout(next, 1000);
             } else {
                 st.l--; 
                 msgEl.innerText = "❌ ERA: " + st.c.t.toUpperCase();
                 msgEl.style.color = "#ff003c";
                 document.getElementById('lives').innerText = "❤️".repeat(st.l);
-                
-                // Devolve a pergunta para o final da fila (para tentar de novo depois)
                 st.q.unshift(st.c); 
                 setTimeout(next, 2500);
             }
@@ -313,7 +309,6 @@
             `;
         }
 
-        // Permitir enviar com Enter
         document.getElementById('ans').addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 check();
