@@ -12,9 +12,8 @@
         body { 
             background: var(--bg); 
             color: #eee; 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Segoe UI', monospace; 
             margin: 0; 
-            /* Altura dinâmica para corrigir teclado do iPhone */
             height: 100dvh; 
             display: flex; 
             justify-content: center; 
@@ -28,28 +27,33 @@
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 15px; 
+            gap: 10px; 
         }
 
-        /* Topo */
+        /* HUD */
         .hud { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            border-bottom: 1px solid #333; 
-            padding-bottom: 10px; 
+            padding-bottom: 5px; 
             min-height: 40px;
         }
 
         .btn-restart {
-            background: none;
-            border: 1px solid #333;
-            color: #888;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-transform: uppercase;
+            background: none; border: 1px solid #333; color: #888;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;
+            cursor: pointer; text-transform: uppercase;
+        }
+
+        /* Barra de Progresso */
+        .progress-container {
+            width: 100%; height: 6px; background: #222;
+            border-radius: 3px; overflow: hidden; margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 100%; background: var(--green); width: 0%;
+            transition: width 0.5s ease; box-shadow: 0 0 10px var(--green);
         }
 
         /* Tela Central */
@@ -67,76 +71,73 @@
             overflow-y: auto; 
         }
 
-        .def { font-size: 1.3rem; line-height: 1.4; font-weight: 500; }
-        
+        .def { 
+            font-size: 1.3rem; line-height: 1.4; font-weight: 500; min-height: 60px; 
+        }
+        /* Cursor piscando */
+        .def::after {
+            content: '|'; animation: blink 1s infinite; color: var(--purple);
+        }
+
         .hint { 
-            color: #f8e71c; 
-            margin-top: 15px; 
-            font-size: 1rem; 
-            border-top: 1px dashed #333; 
-            padding-top: 10px; 
-            display: none; 
-            width: 100%;
+            color: #f8e71c; margin-top: 15px; font-size: 1rem; 
+            border-top: 1px dashed #333; padding-top: 10px; 
+            display: none; width: 100%;
         }
         .show { display: block; animation: fadeIn 0.5s; }
 
-        /* Controles Fixos no Fundo */
+        /* Controles */
         .controls {
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
+            display: flex; flex-direction: column; gap: 10px; 
             padding-bottom: env(safe-area-inset-bottom);
         }
 
         input { 
-            background: #1a1a1a; 
-            border: 2px solid #333; 
-            color: #fff; 
-            padding: 15px; 
-            width: 100%; 
-            font-size: 16px; 
-            border-radius: 8px; 
-            text-transform: uppercase; 
-            outline: none;
+            background: #1a1a1a; border: 2px solid #333; color: #fff; 
+            padding: 15px; width: 100%; font-size: 16px; 
+            border-radius: 8px; text-transform: uppercase; outline: none;
         }
         input:focus { border-color: var(--cyan); }
 
         .btns { display: flex; gap: 10px; }
-        
         button.action { 
-            padding: 15px; 
-            flex: 1; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            font-size: 1rem;
-            cursor: pointer; 
+            padding: 15px; flex: 1; border: none; border-radius: 8px; 
+            font-weight: bold; font-size: 1rem; cursor: pointer; 
         }
-        
         .btn-ok { background: var(--cyan); color: #000; flex: 2; }
         .btn-hint { background: #333; color: #ff0; flex: 1; }
-
         .msg { text-align: center; height: 20px; font-weight: bold; font-size: 0.9rem; margin-top: -5px;}
 
-        /* Telas de Início */
+        /* Overlays (Início e Relatório) */
         .overlay { 
-            position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.98); 
-            display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; 
-            z-index: 50; text-align: center; 
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 50; text-align: center; padding: 20px;
         }
         .hidden { display: none !important; }
         
         .btn-start { 
-            background: var(--green); color: #000; 
-            padding: 18px 50px; font-size: 1.2rem; 
-            border-radius: 50px; margin-top: 30px; 
+            background: var(--green); color: #000; padding: 18px 50px; 
+            font-size: 1.2rem; border-radius: 50px; margin-top: 20px; 
             border: none; font-weight: bold; cursor: pointer;
             box-shadow: 0 0 20px rgba(10, 255, 10, 0.3);
         }
 
+        /* Estilo do Relatório */
+        .report-box {
+            background: #111; border: 1px solid #333; padding: 20px;
+            border-radius: 10px; width: 100%; max-width: 400px;
+            margin-bottom: 20px; text-align: left;
+        }
+        .report-row {
+            display: flex; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px dashed #333;
+            font-size: 1rem;
+        }
+        .report-row:last-child { border-bottom: none; }
+        .report-val { font-weight: bold; color: var(--cyan); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -149,15 +150,19 @@
             <span id="hints" style="font-size: 0.9rem">💡 x3</span>
         </div>
 
+        <div class="progress-container">
+            <div class="progress-bar" id="prog-bar"></div>
+        </div>
+
         <div class="screen">
-            <div class="def" id="q">Carregando...</div>
+            <div class="def" id="q"></div>
             <div class="hint" id="h"></div>
         </div>
 
         <div class="msg" id="msg"></div>
 
         <div class="controls">
-            <input type="text" id="ans" placeholder="DIGITE SUA RESPOSTA..." autocomplete="off">
+            <input type="text" id="ans" placeholder="DIGITE AQUI..." autocomplete="off">
             <div class="btns">
                 <button class="action btn-ok" onclick="check()">ENVIAR</button>
                 <button class="action btn-hint" onclick="tip()">DICA</button>
@@ -172,7 +177,6 @@
     </div>
 
     <script>
-        // Correção aplicada: variável renomeada para 'db' para bater com o código lógico
         const db = [
             { t: "Migração", d: "Termo geral para qualquer deslocamento de pessoas pelo espaço geográfico.", h: "Pesquise: 'Definição geral de deslocamento populacional'." },
             { t: "Migração interna", d: "Deslocamento de pessoas dentro das fronteiras de um mesmo país.", h: "Pesquise: 'Tipos de migração dentro do território nacional'." },
@@ -229,32 +233,41 @@
             { t: "Segregação espacial", d: "Separação física de grupos sociais (ricos x pobres) na cidade.", h: "Pesquise: 'Favelização e condomínios fechados'.", a: ["Segregacao socioespacial"] }
         ];
 
-        let st = { q: [], c: null, l: 5, h: 3, s: 0 };
+        let st = { q: [], c: null, l: 5, h: 3, s: 0, startTime: 0 };
+        let typeInterval; 
 
         function init() {
-            // Embaralhamento aleatório robusto
             st.q = [...db].sort(() => Math.random() - 0.5); 
-            st.l = 5; 
-            st.h = 3; 
-            st.s = 0;
+            st.l = 5; st.h = 3; st.s = 0;
+            st.startTime = Date.now(); // Inicia o cronômetro
             
             document.getElementById('start').classList.add('hidden');
             document.getElementById('lives').innerHTML = "❤️❤️❤️❤️❤️";
             document.getElementById('hints').innerText = "💡 x3";
+            document.getElementById('prog-bar').style.width = "0%";
+            
+            clearInterval(typeInterval); // Garante que não tenha digitação antiga rodando
             next();
+        }
+
+        function typeWriter(text, elementId) {
+            const el = document.getElementById(elementId);
+            el.innerText = ""; 
+            clearInterval(typeInterval); 
+            
+            let i = 0;
+            typeInterval = setInterval(() => {
+                el.innerText += text.charAt(i);
+                i++;
+                if (i >= text.length) clearInterval(typeInterval);
+            }, 25); // Um pouco mais rápido (25ms)
         }
 
         function next() {
             if (!st.q.length || st.l <= 0) return end();
             
             st.c = st.q.pop();
-            
-            const qEl = document.getElementById('q');
-            qEl.style.opacity = 0;
-            setTimeout(() => {
-                qEl.innerText = st.c.d;
-                qEl.style.opacity = 1;
-            }, 200);
+            typeWriter(st.c.d, 'q');
 
             document.getElementById('h').classList.remove('show');
             document.getElementById('ans').value = '';
@@ -263,11 +276,8 @@
         }
 
         function check() {
-            // Normaliza a resposta do usuário
             let v = document.getElementById('ans').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            // Normaliza a resposta oficial
             let r = st.c.t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            // Normaliza as alternativas
             let alt = st.c.a ? st.c.a.map(x => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()) : [];
 
             const msgEl = document.getElementById('msg');
@@ -276,6 +286,7 @@
                 st.s++; 
                 msgEl.innerText = "✅ CERTO!";
                 msgEl.style.color = "#0aff0a";
+                updateProgress();
                 setTimeout(next, 1000);
             } else {
                 st.l--; 
@@ -285,6 +296,11 @@
                 st.q.unshift(st.c); 
                 setTimeout(next, 2500);
             }
+        }
+
+        function updateProgress() {
+            let pct = (st.s / db.length) * 100;
+            document.getElementById('prog-bar').style.width = pct + "%";
         }
 
         function tip() {
@@ -297,22 +313,51 @@
         }
 
         function end() {
+            // Cálculos do Relatório
+            const endTime = Date.now();
+            const totalSeconds = Math.floor((endTime - st.startTime) / 1000);
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            const timeStr = `${m}:${s}`;
+            
+            const totalQuestions = db.length;
+            const accuracy = Math.round((st.s / totalQuestions) * 100);
             const win = st.l > 0;
+
             const tela = document.getElementById('start');
             tela.classList.remove('hidden');
+            
+            // HTML do Relatório
             tela.innerHTML = `
-                <h1 style="color: ${win ? 'var(--green)' : 'var(--red)'}; font-size: 2.5rem; margin-bottom: 10px;">
+                <h1 style="color: ${win ? 'var(--green)' : 'var(--red)'}; font-size: 2rem; margin-bottom: 20px;">
                     ${win ? 'MISSÃO CUMPRIDA' : 'FALHA NO SISTEMA'}
                 </h1>
-                <p style="font-size: 1.2rem; margin-bottom: 20px;">Acertos: ${st.s}</p>
-                <button class="btn-start" onclick="init()">REINICIAR</button>
+                
+                <div class="report-box">
+                    <div class="report-row">
+                        <span>Tempo Total:</span>
+                        <span class="report-val">${timeStr}</span>
+                    </div>
+                    <div class="report-row">
+                        <span>Conceitos Recuperados:</span>
+                        <span class="report-val">${st.s} / ${totalQuestions}</span>
+                    </div>
+                    <div class="report-row">
+                        <span>Precisão:</span>
+                        <span class="report-val">${accuracy}%</span>
+                    </div>
+                     <div class="report-row">
+                        <span>Status da Nave:</span>
+                        <span class="report-val" style="color:${win ? '#0aff0a' : '#ff003c'}">${win ? 'OPERANTE' : 'CRÍTICO'}</span>
+                    </div>
+                </div>
+
+                <button class="btn-start" onclick="init()">NOVA MISSÃO</button>
             `;
         }
 
         document.getElementById('ans').addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                check();
-            }
+            if (event.key === "Enter") check();
         });
     </script>
 </body>
