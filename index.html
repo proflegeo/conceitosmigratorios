@@ -82,9 +82,9 @@
 
         /* Área de input fixa no fundo */
         .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
             padding-bottom: env(safe-area-inset-bottom); /* Proteção para iPhones novos */
         }
 
@@ -262,12 +262,18 @@
         }
 
         function check() {
+            // Normaliza a resposta do usuário
             let v = document.getElementById('ans').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            // Normaliza a resposta oficial
             let r = st.c.t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             
+            // Verifica se existe lista de respostas alternativas (a) e normaliza elas
+            let alt = st.c.a ? st.c.a.map(x => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()) : [];
+
             const msgEl = document.getElementById('msg');
 
-            if (v === r) {
+            // Verifica se bate com a oficial OU com alguma alternativa
+            if (v === r || alt.includes(v)) {
                 st.s++; 
                 msgEl.innerText = "✅ CERTO!";
                 msgEl.style.color = "#0aff0a";
