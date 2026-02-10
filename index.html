@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Protocolo M.I.G.R.A.Ç.Ã.O.</title>
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --panel-bg: #141419;
+            --neon-cyan: #00f3ff;
+            --neon-red: #ff003c;
+            --neon-green: #0aff0a;
+            --neon-yellow: #f8e71c;
+            --neon-purple: #bd00ff;
+            --text-main: #e0e6ed;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden; /* Evita scroll na página toda */
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%);
+        }
+
+        #game-interface {
+            width: 100%;
+            max-width: 500px; /* Largura de celular */
+            background: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            gap: 10px;
+            position: relative;
+        }
+
+        /* HUD */
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+        }
+
+        .timer { color: var(--neon-cyan); font-family: monospace; font-size: 1.1rem; }
+
+        /* Terminais e Áreas de Texto */
+        .terminal-screen {
+            background: #000;
+            border-left: 4px solid var(--neon-purple);
+            padding: 15px;
+            flex-grow: 1; /* Ocupa o espaço disponível */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            border-radius: 6px;
+            min-height: 100px;
+        }
+
+        .definition-text { font-size: 1.1rem; line-height: 1.3; }
+        
+        .hint-text { 
+            font-size: 0.9rem; color: var(--neon-yellow); margin-top: 10px;
+            display: none; 
+        }
+        .hint-visible { display: block; }
+
+        /* Input e Botões - Otimizados para Dedos */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: env(safe-area-inset-bottom); /* Suporte a iPhones novos */
+        }
+
+        .input-group { display: flex; gap: 8px; }
+
+        input[type="text"] {
+            flex: 1;
+            background: #1f1f26; border: 2px solid #444; color: #fff;
+            padding: 12px; font-size: 16px; /* 16px evita zoom no iOS */
+            border-radius: 8px; outline: none;
+            text-transform: uppercase;
+        }
+
+        button {
+            padding: 12px; font-weight: bold; border: none; border-radius: 8px;
+            cursor: pointer; text-transform: uppercase;
+        }
+
+        .btn-action { background: var(--neon-cyan); color: #000; flex: 2; }
+        .btn-hint { background: #333; color: var(--neon-yellow); border: 1px solid var(--neon-yellow); flex: 1; }
+
+        /* Progress Bar */
+        .progress-track { width: 100%; height: 6px; background: #222; border-radius: 3px; }
+        .progress-bar { height: 100%; background: var(--neon-green); width: 0%; transition: 0.3s; }
+
+        /* Overlays */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 100; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+
+        .hidden { display: none !important; }
+
+        .btn-start {
+            background: var(--neon-green); color: #000; padding: 15px 40px;
+            border-radius: 30px; font-size: 1.2rem; margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-interface">
+        <div class="hud-top">
+            <div id="lives-txt">❤️❤️❤️❤️❤️</div>
+            <div class="timer" id="timer-display">00:00</div>
+            <div id="hints-txt">💡 x3</div>
+        </div>
+
+        <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+
+        <div class="terminal-screen">
+            <div class="definition-text" id="question-text">Pressione Iniciar...</div>
+            <div class="hint-text" id="hint-display"></div>
+        </div>
+
+        <div id="feedback-msg" style="text-align: center; min-height: 20px; font-weight: bold;"></div>
+
+        <div class="input-area">
+            <div class="input-group">
+                <input type="text" id="answer-input" placeholder="Resposta..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <button class="btn-action" id="submit-btn">ENVIAR</button>
+                <button class="btn-hint" id="hint-btn">DICA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="start-overlay" class="overlay">
+        <h1 style="color: var(--neon-cyan)">M.I.G.R.A.Ç.Ã.O.</h1>
+        <p>Recupere o sistema de navegação da nave Legeo.</p>
+        <button class="btn-start" id="start-btn">INICIAR MISSÃO</button>
+    </div>
+
+    <script>
+        const database = [
+            const database = [
+            { t: "Migração", d: "Termo geral para qualquer deslocamento de pessoas pelo espaço geográfico.", h: "Pesquise: 'Definição geral de deslocamento populacional'." },
+            { t: "Migração interna", d: "Deslocamento de pessoas dentro das fronteiras de um mesmo país.", h: "Pesquise: 'Tipos de migração dentro do território nacional'." },
+            { t: "Migração internacional", d: "Deslocamento de pessoas entre países diferentes.", h: "Pesquise: 'Conceito de migração externa ou entre nações'." },
+            { t: "Emigração", d: "Ato de SAIR do seu local de origem para viver em outro lugar.", h: "Pesquise: 'Diferença entre Emigrar e Imigrar (Saída)'." },
+            { t: "Imigração", d: "Ato de CHEGAR e entrar em um novo local para viver.", h: "Pesquise: 'Diferença entre Emigrar e Imigrar (Chegada)'." },
+            { t: "Migração intermunicipal", d: "Mudança de residência de uma cidade para outra.", h: "Pesquise: 'Mudança de endereço entre municípios vizinhos'." },
+            { t: "Migração intramunicipal", d: "Mudança de residência dentro da mesma cidade (bairros).", h: "Pesquise: 'Deslocamento residencial dentro do mesmo município'." },
+            { t: "Migração interestadual", d: "Mudança de residência de um estado para outro.", h: "Pesquise: 'Migração da Bahia para São Paulo (exemplo)'." },
+            { t: "Migração intraestadual", d: "Mudança de cidade dentro do mesmo estado.", h: "Pesquise: 'Migração de Campinas para Santos (dentro de SP)'." },
+            { t: "Migração inter-regional", d: "Deslocamento de uma macrorregião do país para outra.", h: "Pesquise: 'Fluxo migratório do Nordeste para o Sudeste'." },
+            { t: "Migração intrarregional", d: "Deslocamento entre locais na mesma macrorregião.", h: "Pesquise: 'Migração entre estados do próprio Nordeste'." },
+            { t: "Migração pendular", d: "Movimento diário de vai e vem (casa-trabalho).", h: "Pesquise: 'Deslocamento diário de trabalhadores em metrópoles'.", a: ["Movimento pendular"] },
+            { t: "Migração definitiva", d: "Mudança sem intenção de voltar, moradia fixa.", h: "Pesquise: 'Mudança permanente de residência'." },
+            { t: "Migração temporária", d: "Deslocamento por tempo limitado com intenção de retorno.", h: "Pesquise: 'Intercâmbio ou trabalho temporário no exterior'." },
+            { t: "Migração sazonal", d: "Deslocamento ligado a estações do ano ou colheitas.", h: "Pesquise: 'Trabalhadores rurais temporários (bóias-frias)'.", a: ["Sazonal"] },
+            { t: "Transumância", d: "Outro nome para migração sazonal (comum na pecuária).", h: "Pesquise: 'Deslocamento de gado no Sertão ou nos Alpes'." },
+            { t: "Cidade dormitório", d: "Cidade onde a população dorme mas trabalha na cidade vizinha.", h: "Pesquise: 'Cidades satélites que servem apenas para residência'." },
+            { t: "Migração de cérebros", d: "Saída de profissionais altamente qualificados para países ricos.", h: "Pesquise: 'Fuga de pesquisadores e cientistas do Brasil'.", a: ["Fuga de cerebros"] },
+            { t: "Migração espontânea", d: "Movimento por vontade própria e planejamento.", h: "Pesquise: 'Migrar por desejo de melhoria de vida (voluntário)'." },
+            { t: "Migração forçada", d: "Deslocamento involuntário por guerras ou desastres.", h: "Pesquise: 'Pessoas obrigadas a sair de casa (refúgio)'." },
+            { t: "Migração de retorno", d: "A volta do migrante para sua terra natal.", h: "Pesquise: 'Nordestinos voltando do Sudeste para o Nordeste'." },
+            { t: "Êxodo Rural", d: "Migração em massa do campo para a cidade.", h: "Pesquise: 'Processo de urbanização do Brasil na década de 1970'." },
+            { t: "Diáspora", d: "Dispersão de um povo pelo mundo mantendo identidade cultural.", h: "Pesquise: 'Dispersão dos judeus ou africanos pelo mundo'." },
+            { t: "Cosmopolita", d: "Pessoa ou cidade que agrega diversas culturas, 'Cidadão do Mundo'.", h: "Pesquise: 'Cidades globais multiculturais como NY ou Londres'." },
+            { t: "Imigrante econômico", d: "Pessoa que migra voluntariamente por emprego/dinheiro.", h: "Pesquise: 'Migração motivada por busca de trabalho'." },
+            { t: "Refugiado", d: "Pessoa que fugiu por perseguição ou guerra, com proteção legal.", h: "Pesquise: 'Definição da ACNUR/ONU para quem foge de guerras'." },
+            { t: "Refugiado climático", d: "Pessoa forçada a migrar por desastres ambientais.", h: "Pesquise: 'Migrantes afetados por secas extremas ou inundações'." },
+            { t: "Apátrida", d: "Pessoa sem nacionalidade reconhecida por nenhum país.", h: "Pesquise: 'Pessoas que não possuem pátria ou documentos'." },
+            { t: "Asilo", d: "Proteção jurídica pedida a outro governo por perseguição política.", h: "Pesquise: 'O que Snowden ou Assange pediram a outros países'." },
+            { t: "Exilado", d: "Pessoa expulsa de seu país, impedida de retornar.", h: "Pesquise: 'Brasileiros expulsos durante a Ditadura Militar'." },
+            { t: "Deslocados internos", d: "Fugitivos de conflitos que não cruzaram fronteiras internacionais.", h: "Pesquise: 'Diferença entre refugiado e deslocado interno'." },
+            { t: "Nômade digital", d: "Profissional que usa internet para trabalhar de qualquer lugar.", h: "Pesquise: 'Trabalhar viajando o mundo com laptop'." },
+            { t: "Expatriado", d: "Profissional enviado pela empresa para trabalhar no exterior.", h: "Pesquise: 'Executivos transferidos para filiais internacionais'." },
+            { t: "Fronteiriço", d: "Pessoa que vive na divisa e cruza a fronteira frequentemente.", h: "Pesquise: 'Vida em cidades gêmeas (ex: Ponta Porã/Pedro Juan)'." },
+            { t: "Extradição", d: "Entrega de um criminoso por um país à justiça de outro.", h: "Pesquise: 'País devolvendo fugitivo para ser julgado na origem'." },
+            { t: "Imigrante ilegal", d: "Pessoa em país estrangeiro sem documentação oficial.", h: "Pesquise: 'Migração indocumentada ou irregular'.", a: ["Ilegal", "Indocumentado", "Clandestino"] },
+            { t: "Deportar", d: "Ato do Estado de enviar forçadamente estrangeiro de volta.", h: "Pesquise: 'O que acontece com imigrantes ilegais detidos'.", a: ["Deportacao"] },
+            { t: "Coyote", d: "Atravessador pago para guiar imigrantes ilegais.", h: "Pesquise: 'Atravessadores na fronteira México-EUA'.", a: ["Coiote"] },
+            { t: "Tráfico de pessoas", d: "Recrutamento enganoso/forçado de pessoas para exploração.", h: "Pesquise: 'Exploração sexual ou trabalho escravo de migrantes'.", a: ["Trafico humano"] },
+            { t: "Naturalização", d: "Processo jurídico para adquirir nacionalidade de outro país.", h: "Pesquise: 'Como um estrangeiro vira cidadão brasileiro'." },
+            { t: "Visto", d: "Autorização no passaporte para entrar em um país.", h: "Pesquise: 'Documento consular para entrada nos EUA'." },
+            { t: "Dupla cidadania", d: "Ter nacionalidade de dois países ao mesmo tempo.", h: "Pesquise: 'Ter passaporte brasileiro e italiano simultaneamente'." },
+            { t: "Saldo migratório", d: "Diferença matemática entre número de imigrantes e emigrantes.", h: "Pesquise: 'Cálculo demográfico: Entradas menos Saídas'." },
+            { t: "Censo demográfico", d: "Pesquisa oficial do governo para contar a população.", h: "Pesquise: 'Pesquisa do IBGE realizada a cada 10 anos'.", a: ["Censo", "Recenseamento"] },
+            { t: "Fatores de repulsão", d: "Motivos negativos que empurram a pessoa para fora (ex: guerra).", h: "Pesquise: 'Motivos que causam a saída forçada de um país'.", a: ["Fatores repulsivos", "Repulsao"] },
+            { t: "Fatores de atração", d: "Motivos positivos que puxam o migrante (ex: emprego).", h: "Pesquise: 'O que atrai imigrantes para países desenvolvidos'.", a: ["Fatores atrativos", "Atracao"] },
+            { t: "Remessas financeiras", d: "Dinheiro enviado por trabalhadores no exterior para a família.", h: "Pesquise: 'Envio de dólares de imigrantes para o país de origem'." },
+            { t: "Xenofobia", d: "Aversão, ódio ou preconceito contra estrangeiros.", h: "Pesquise: 'Notícias sobre preconceito contra imigrantes na Europa'." },
+            { t: "Gentrificação", d: "Valorização imobiliária que expulsa moradores pobres de um bairro.", h: "Pesquise: 'Enobrecimento urbano e expulsão de moradores antigos'." },
+            { t: "Enclave étnico", d: "Área na cidade concentrada por grupo de mesma nacionalidade.", h: "Pesquise: 'Bairro da Liberdade (SP) ou Little Italy (NY)'.", a: ["Gueto", "Bairro etnico"] },
+            { t: "Assimilação cultural", d: "Quando o imigrante adota costumes locais e perde os originais.", h: "Pesquise: 'Perda de identidade cultural do imigrante'." },
+            { t: "Multiculturalismo", d: "Coexistência de diversas culturas no mesmo território.", h: "Pesquise: 'Sociedades onde várias culturas convivem em harmonia'." },
+            { t: "Segregação espacial", d: "Separação física de grupos sociais (ricos x pobres) na cidade.", h: "Pesquise: 'Favelização e condomínios fechados'.", a: ["Segregacao socioespacial"] }
+        ];
+
+        const Game = {
+            state: { queue: [], current: null, lives: 5, hints: 3, score: 0, startTime: 0 },
+            
+            init() {
+                this.state.queue = [...database].sort(() => Math.random() - 0.5);
+                this.state.lives = 5; this.state.hints = 3; this.state.score = 0;
+                this.state.startTime = Date.now();
+                document.getElementById('start-overlay').classList.add('hidden');
+                this.updateHUD();
+                this.nextTurn();
+                this.timer();
+            },
+
+            nextTurn() {
+                if (this.state.queue.length === 0 || this.state.lives <= 0) {
+                    this.endGame(); return;
+                }
+                this.state.current = this.state.queue.pop();
+                document.getElementById('question-text').textContent = this.state.current.d;
+                document.getElementById('hint-display').classList.remove('hint-visible');
+                document.getElementById('answer-input').value = "";
+                document.getElementById('feedback-msg').textContent = "";
+            },
+
+            check() {
+                const input = document.getElementById('answer-input').value.trim().toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const correct = this.state.current.t.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                if (input === correct) {
+                    this.state.score++;
+                    document.getElementById('feedback-msg').textContent = "✅ EXCELENTE!";
+                    document.getElementById('feedback-msg').style.color = "var(--neon-green)";
+                    setTimeout(() => this.nextTurn(), 1000);
+                } else {
+                    this.state.lives--;
+                    document.getElementById('feedback-msg').textContent = `❌ ERA: ${this.state.current.t.toUpperCase()}`;
+                    document.getElementById('feedback-msg').style.color = "var(--neon-red)";
+                    this.state.queue.unshift(this.state.current); // Volta pra fila
+                    setTimeout(() => this.nextTurn(), 2000);
+                }
+                this.updateHUD();
+            },
+
+            updateHUD() {
+                document.getElementById('lives-txt').textContent = "❤️".repeat(this.state.lives);
+                document.getElementById('hints-txt').textContent = "💡 x" + this.state.hints;
+                const progress = (this.state.score / database.length) * 100;
+                document.getElementById('progress-bar').style.width = progress + "%";
+            },
+
+            timer() {
+                setInterval(() => {
+                    const sec = Math.floor((Date.now() - this.state.startTime)/1000);
+                    const m = Math.floor(sec/60).toString().padStart(2,'0');
+                    const s = (sec%60).toString().padStart(2,'0');
+                    document.getElementById('timer-display').textContent = `${m}:${s}`;
+                }, 1000);
+            },
+
+            endGame() {
+                const win = this.state.lives > 0;
+                const overlay = document.getElementById('start-overlay');
+                overlay.classList.remove('hidden');
+                overlay.innerHTML = `
+                    <h1 style="color: ${win ? 'var(--neon-green)' : 'var(--neon-red)'}">${win ? 'SISTEMA RESTAURADO' : 'NAVE PERDIDA'}</h1>
+                    <p>Acertos: ${this.state.score}</p>
+                    <button class="btn-start" onclick="location.reload()">RECOMECAR</button>
+                `;
+            }
+        };
+
+        document.getElementById('start-btn').onclick = () => Game.init();
+        document.getElementById('submit-btn').onclick = () => Game.check();
+        document.getElementById('hint-btn').onclick = () => {
+            if (Game.state.hints > 0) {
+                Game.state.hints--;
+                document.getElementById('hint-display').textContent = "🔎 " + Game.state.current.h;
+                document.getElementById('hint-display').classList.add('hint-visible');
+                Game.updateHUD();
+            }
+        };
+    </script>
+</body>
+</html>
